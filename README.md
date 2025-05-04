@@ -90,3 +90,11 @@ Encodes initial state, positions, shelf-product mapping, and delivery goals for 
 | 10   | Move Down            | Deliver 1×Product 3      |
 | 11   | Move Left            | Move Down                |
 | 12   | Deliver 1×Product 2  | —                        |
+
+## Summary
+This project successfully demonstrates how declarative planning through **Answer Set Programming (ASP)** can be used to coordinate multiple autonomous robots in a constrained, dynamic warehouse environment. By clearly separating domain logic from problem instances, and encoding realistic constraints such as traffic rules, shelf handling, and delivery requirements, the system consistently produced optimized, valid plans across diverse scenarios.
+
+Using the **Clingo** solver, we achieved fast and scalable planning, with all test instances solving in under 1.5 seconds on a consumer-grade MacBook Air. The modular design ensures maintainability, and the logic-driven approach allows for rich extensions, such as real-time replanning, human-robot interaction modeling, and industrial-scale simulations.
+
+This work not only showcases a functional simulation of warehouse automation, but also reinforces the power of **ASP** in real-world AI planning problems where safety, efficiency, and adaptability are critical.
+
