@@ -1,0 +1,58 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%	AUTOMATED WAREHOUSE DOMAIN	%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%	     ADARSH SARIPALLI		%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%	     INST1.TXT		%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		FACTS		%%%%%%%%%%%%%%%%%%%%%%%%%
+nbots(2). % There are 2 robots
+robot(1). robot(2). % Robot IDs
+numShelves(6). % There are 6 shelves
+rack(1). rack(2). rack(3). rack(4). rack(5). rack(6). % rack IDs
+numColumns(4). % The grid has 4 columns
+numRows(4). % The grid has 4 rows
+numNodes(16). % There are 16 spots
+spot(1). spot(2). spot(3). spot(4). spot(5). spot(6). spot(7). spot(8).
+spot(9). spot(10). spot(11). spot(12). spot(13). spot(14). spot(15). spot(16).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%	GRID POSITIONS	    %%%%%%%%%%%%%%%%%%%%%%%%%
+spotAt(1,pair(1,1)). spotAt(2,pair(2,1)). spotAt(3,pair(3,1)). spotAt(4,pair(4,1)). 
+spotAt(5,pair(1,2)). spotAt(6,pair(2,2)). spotAt(7,pair(3,2)). spotAt(8,pair(4,2)). 
+spotAt(9,pair(1,3)). spotAt(10,pair(2,3)). spotAt(11,pair(3,3)). spotAt(12,pair(4,3)).
+spotAt(13,pair(1,4)). spotAt(14,pair(2,4)). spotAt(15,pair(3,4)). spotAt(16,pair(4,4)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%	HIGHWAYS	%%%%%%%%%%%%%%%%%%%%%%%%%
+noway(4). noway(8). noway(12). noway(13). noway(14). noway(15). noway(16).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%	PICKING STATIONS	%%%%%%%%%%%%%%%%%%%%%%%%%
+pickingStationAt(1,9). % Picking Station 1 is at spot 9
+pickingStationAt(2,3). % Picking Station 2 is at spot 3
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		ROBOTS		%%%%%%%%%%%%%%%%%%%%%%%%%
+robotAt(1,object(spot,12),0). % Robot 1 is at spot 12
+robotAt(2,object(spot,6),0). % Robot 2 is at spot 6
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		RACKS		%%%%%%%%%%%%%%%%%%%%%%%%%
+rackOn(1,object(spot,11),0). % rack 1 is at spot 11
+rackOn(2,object(spot,2),0).  % rack 2 is at spot 2
+rackOn(3,object(spot,10),0).  % rack 3 is at spot 10
+rackOn(4,object(spot,6),0).  % rack 4 is at spot 6
+rackOn(5,object(spot,7),0). % rack 5 is at spot 7
+rackOn(6,object(spot,5),0).  % rack 6 is at spot 5
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		PRODUCTS		%%%%%%%%%%%%%%%%%%%%%%%%%
+productOn(1,object(rack,3),with(quant,1),0).
+productOn(2,object(rack,4),with(quant,1),0).
+productOn(3,object(rack,6),with(quant,4),0).
+productOn(4,object(rack,5),with(quant,1),0).
+productOn(4,object(rack,6),with(quant,1),0).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		ORDERS		%%%%%%%%%%%%%%%%%%%%%%%%%
+% Order1: Deliver Product 1 (quant 1) to Picking Station 1
+% Order1: Deliver Product 3 (quant 4) to Picking Station 1
+orderAt(1,object(spot,9),contains(1,1),0). 
+orderAt(1,object(spot,9),contains(3,4),0).
+
+% Order2: Deliver Product 2 (quant 1) to Picking Station 2
+orderAt(2,object(spot,3),contains(2,1),0). 
+
+% Order3: Deliver Product 4 (quant 1) to Picking Station 2
+orderAt(3,object(spot,3),contains(4,1),0). 

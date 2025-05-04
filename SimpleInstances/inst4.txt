@@ -1,0 +1,55 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%   AUTOMATED WAREHOUSE DOMAIN   %%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%           INST4.TXT            %%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%  GLOBAL COUNTS  %%%%%%%%%%%
+nbots(2).
+robot(1). robot(2).
+numShelves(6).
+rack(1..6).
+numColumns(4).
+numRows(4).
+numNodes(16).
+spot(1..16).
+
+%%%%%%%%%%%  GRID MAPPING  %%%%%%%%%%%
+spotAt(1 ,pair(1,1)).  spotAt(2 ,pair(2,1)).  spotAt(3 ,pair(3,1)).  spotAt(4 ,pair(4,1)).
+spotAt(5 ,pair(1,2)).  spotAt(6 ,pair(2,2)).  spotAt(7 ,pair(3,2)).  spotAt(8 ,pair(4,2)).
+spotAt(9 ,pair(1,3)).  spotAt(10,pair(2,3)).  spotAt(11,pair(3,3)). spotAt(12,pair(4,3)).
+spotAt(13,pair(1,4)).  spotAt(14,pair(2,4)).  spotAt(15,pair(3,4)). spotAt(16,pair(4,4)).
+
+%%%%%%%%%%%  HIGHWAYS  %%%%%%%%%%%
+noway(4).  noway(8).  noway(12).
+noway(13). noway(14). noway(15). noway(16).
+
+%%%%%%%%%%%  PICKING STATIONS  %%%%%%%%%%%
+pickingStationAt(1,9).   % (row 1, col 3)
+pickingStationAt(2,3).   % (row 3, col 1)
+
+%%%%%%%%%%%  INITIAL ROBOT LOCATIONS (t = 0)  %%%%%%%%%%%
+robotAt(1,object(spot,12),0).   % spot 12  (4,3)
+robotAt(2,object(spot,6 ),0).   % spot 6   (2,2)
+
+%%%%%%%%%%%  RACK LOCATIONS (t = 0)  %%%%%%%%%%%
+rackOn(1,object(spot,11),0).
+rackOn(2,object(spot,2 ),0).
+rackOn(3,object(spot,10),0).
+rackOn(4,object(spot,6 ),0).    % shares spot with Robot 2 initially
+rackOn(5,object(spot,7 ),0).
+rackOn(6,object(spot,5 ),0).
+
+%%%%%%%%%%%  PRODUCT ALLOCATIONS (t = 0)  %%%%%%%%%%%
+% Interpretation of original “product … pair(X,Y)”:
+%   X  -> shelf ID   |  Y -> quantity
+
+productOn(1,object(rack,3),with(quant,1),0).   % Product 1 on rack 3 (qty 1)
+productOn(2,object(rack,4),with(quant,3),0).   % Product 2 on rack 4 (qty 3)
+
+%%%%%%%%%%%  ORDERS  %%%%%%%%%%%
+% Order 1 (PS-1):  Product 1 ×1
+orderAt(1,object(spot,9),contains(1,1),0).
+
+% Order 2 (PS-2):  Product 2 ×1
+orderAt(2,object(spot,3),contains(2,1),0).
+
+% Order 3 (PS-2):  Product 2 ×2
+orderAt(3,object(spot,3),contains(2,2),0).

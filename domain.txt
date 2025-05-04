@@ -1,0 +1,131 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%	AUTOMATED WAREHOUSE DOMAIN	%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%	     ADARSH SARIPALLI		%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%		DOMAIN.txt		%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		ACTIONS		%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+#const max=50.
+
+%robotmoves in left, right, up, down
+{robotMoveUp(R,T)}1 :- R=1..ROWS, nbots(ROWS), T=0..N,N=max-1.
+{robotMoveDown(R,T)}1 :- R=1..ROWS, nbots(ROWS), T=0..N,N=max-1.
+{robotMoveLeft(R,T)}1 :- R=1..ROWS, nbots(ROWS), T=0..N,N=max-1.
+{robotMoveRight(R,T)}1 :- R=1..ROWS, nbots(ROWS), T=0..N,N=max-1.
+
+%pickup and putdown 
+{pickUp(R,S,T):rack(S)}1:- nbots(ROWS), R=1..ROWS, T=0..N,N=max-1.
+{putDown(R,S,T):rack(S)}1:- nbots(ROWS), R=1..ROWS, T=0..N,N=max-1.
+
+%drop products
+{drop(R,O,with(S,PR,DD),T):orderAt(O,object(spot,NODE),contains(PR,OQ),T), productOn(PR,object(rack,S),with(quant,PQ),T), DD=1..PQ}1:- R=1..ROWS, nbots(ROWS), T=0..N,N=max-1.
+
+action(object(robot,R),moveUp,T) :- robotMoveUp(R,T).
+action(object(robot,R),moveDown,T) :- robotMoveDown(R,T).
+action(object(robot,R),moveLeft,T) :- robotMoveLeft(R,T).
+action(object(robot,R),moveRight,T) :- robotMoveRight(R,T).
+action(object(robot,R),pickup,T):-pickUp(R,_,T).
+action(object(robot,R),putdown,T):-putDown(R,_,T).
+action(object(robot,R),drop(O,PP,DD),T):-drop(R,O,with(S,PP,DD),T).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		EFFECTS		%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Robot move precondition and Effect
+robotAt(R,object(spot,NEW_NODE),T+1) :- robotAt(R,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), spotAt(NEW_NODE, pair(X-1,Y)), robotMoveUp(R,T).
+robotAt(R,object(spot,NEW_NODE),T+1) :- robotAt(R,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), spotAt(NEW_NODE, pair(X+1,Y)), robotMoveDown(R,T).
+robotAt(R,object(spot,NEW_NODE),T+1) :- robotAt(R,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), spotAt(NEW_NODE, pair(X,Y-1)), robotMoveLeft(R,T).
+robotAt(R,object(spot,NEW_NODE),T+1) :- robotAt(R,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), spotAt(NEW_NODE, pair(X,Y+1)), robotMoveRight(R,T).
+
+% Lift rack Effect
+rackOn(S,object(robot,RI),T+1):- pickUp(RI,S,T), rackOn(S,object(spot,NODE),T), robotAt(RI,object(spot,NODE),T).
+
+% Drop rack Effect
+rackOn(S,object(spot,NODE),T+1):- putDown(RI,S,T), rackOn(S,object(robot,RI),T), robotAt(RI,object(spot,NODE),T).
+
+%Product drop Effect
+orderAt(O,object(spot,NODE),contains(PR,OU-DD),T+1):- drop(R,O,with(S,PR,DD),T), orderAt(O,object(spot,NODE),contains(PR,OU),T).
+productOn(PR,object(rack,S),with(quant,PQ-DD),T+1):- drop(R,O,with(S,PR,DD),T), productOn(PR,object(rack,S),with(quant,PQ),T).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		CONSTRAINTS		%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% No simultaneous actions for a bot
+:- action(object(robot,R),A,T), action(object(robot,R),AA,T), A!=AA.
+
+% Cannot move beyond Warehouse 
+:- robotAt(RI,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), X-1<1, robotMoveUp(RI,T).
+:- robotAt(RI,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), X+1>NC, numColumns(NC), robotMoveDown(RI,T).
+:- robotAt(RI,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), Y-1<1, robotMoveLeft(RI,T).
+:- robotAt(RI,object(spot,NODE),T), spotAt(NODE,pair(X,Y)), Y+1>ROWS, numRows(ROWS), robotMoveRight(RI,T).
+
+%While carrying a rack, a robot cannot move to a spot with a rack
+:- robotAt(R,object(spot,NODE),T), rackOn(S,object(spot,NODE),T), rackOn(S2,object(robot,R),T), S != S2.
+
+% One rack pickUp or putDown by one bot
+:- 2{pickUp(R,S,T): robot(R)}, rack(S).
+:- 2{putDown(R,S,T): robot(R)}, rack(S).
+
+% No picking another rack if currently pickedUp
+:- pickUp(RI,S1,T), rackOn(S2,object(robot,RI),T).
+:- pickUp(R1,S,T), rackOn(S,object(robot,R2),T).
+:- pickUp(RI,S,T), rackOn(S,object(spot,NODE),T), not robotAt(RI,object(spot,NODE),T). 
+:- putDown(RI,S,T), not rackOn(S,object(robot,RI),T).
+
+% A bot cannot putdown a rack on a noway
+:- putDown(RI,S,T), robotAt(RI,object(spot,NODE),T), noway(NODE). 
+
+% A robot cannot put down a rack at a spot containing a picking station
+:- putDown(RI,S,T), robotAt(RI,object(spot,NODE),T), pickingStationAt(_,NODE).
+
+% drop at PickingStations
+:- drop(R,O,with(_,PR,_),T), orderAt(O,object(spot,NODE),contains(PR,_),T), not robotAt(R,object(spot, NODE),T).
+
+% drop only shelves containing product
+:- drop(R,O,with(S,PR,_),T), productOn(PR,object(rack,S),with(quant,_),T), not rackOn(S,object(robot,R),T).
+
+:- drop(R,O,with(S,PR,DD),T), orderAt(O,object(spot,NODE),contains(PR,OQ),T), DD>OQ.
+:- drop(R,O,with(S,PR,DD),T), productOn(PR,object(rack,S),with(quant,PQ),T), DD>PQ.
+
+% noway constraints
+:- rackOn(S,object(spot,NODEI),_), noway(NODEI).
+:- pickingStationAt(_,NODEI), noway(NODEI).
+
+% One robot cannot be in 2 spots at once
+:- 2{robotAt(R,object(spot,NODE),T):spot(NODE)}, robot(R), T=0..max.
+
+% Spot is unique for bots
+:- 2{robotAt(R,object(spot,NODE),T):robot(R)}, spot(NODE), T=0..max.
+
+% Swapping prohibited
+:- robotAt(R1,object(spot,NODE1),T), robotAt(R1,object(spot,NODE2),T+1), robotAt(R2,object(spot,NODE2),T), robotAt(R2,object(spot,NODE1),T+1), R1!=R2.
+
+% No rack on 2 bots
+:- 2{rackOn(S,object(robot,ROWS),T): robot(ROWS)}, rack(S), T=0..max.
+
+% 1 bot cannot carry two shelves
+:- 2{rackOn(S,object(robot,ROWS),T): rack(S)}, robot(ROWS), T=0..max.
+
+% one spot/robot has only one rack
+:- 2{rackOn(S,object(spot,NODE),T): spot(NODE)}, rack(S), T=0..max.
+:- 2{rackOn(S,object(spot,NODE),T): rack(S)}, spot(NODE), T=0..max.
+:- rackOn(S,object(spot,_),T), rackOn(S,object(robot,_),T).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%		Common sense law 		%%%%%%%%%%%%%%%%%%%%%%%%%
+
+robotAt(R,object(spot,NODE),T+1) :- robotAt(R,object(spot,NODE),T), not robotMoveUp(R,T), not robotMoveDown(R,T), not robotMoveLeft(R,T), not robotMoveRight(R,T), T<max.
+rackOn(S,object(spot,NODE),T+1):-rackOn(S,object(spot,NODE),T), not pickUp(_,S,T), T<max.
+rackOn(S,object(robot,RI),T+1):-rackOn(S,object(robot,RI),T), not putDown(RI,S,T), T<max.
+orderAt(O,object(spot,NODE),contains(PR,OU),T+1):- orderAt(O,object(spot,NODE),contains(PR,OU),T), productOn(PR,object(rack,S),with(quant,PQ),T), not drop(_,O,with(S,PR,_),T), T<max.
+productOn(PR,object(rack,S),with(quant,PQ),T+1):- productOn(PR,object(rack,S),with(quant,PQ),T), not drop(_,_,with(S,PR,_),T), T<max.
+
+
+% Goal state
+:- not orderAt(O,object(spot,_),contains(PR,0),max), orderAt(O,object(spot,_),contains(PR,_),0).
+
+#minimize{T:action(O,A,T)}.
+#minimize{1,O,A,T:action(O,A,T)}.
+#show action/3.

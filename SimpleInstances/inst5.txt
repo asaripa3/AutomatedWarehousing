@@ -1,0 +1,51 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%   AUTOMATED WAREHOUSE DOMAIN   %%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%            INST5.TXT           %%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%  GLOBAL COUNTS  %%%%%%%%%%%
+nbots(2).
+robot(1). robot(2).
+numShelves(6).
+rack(1..6).
+numColumns(4).
+numRows(4).
+numNodes(16).
+spot(1..16).
+
+%%%%%%%%%%%  GRID MAPPING  %%%%%%%%%%%
+spotAt(1 ,pair(1,1)).  spotAt(2 ,pair(2,1)).  spotAt(3 ,pair(3,1)).  spotAt(4 ,pair(4,1)).
+spotAt(5 ,pair(1,2)).  spotAt(6 ,pair(2,2)).  spotAt(7 ,pair(3,2)).  spotAt(8 ,pair(4,2)).
+spotAt(9 ,pair(1,3)).  spotAt(10,pair(2,3)).  spotAt(11,pair(3,3)). spotAt(12,pair(4,3)).
+spotAt(13,pair(1,4)).  spotAt(14,pair(2,4)).  spotAt(15,pair(3,4)). spotAt(16,pair(4,4)).
+
+%%%%%%%%%%%  HIGHWAYS  %%%%%%%%%%%
+noway(4).  noway(8).  noway(12).
+noway(13). noway(14). noway(15). noway(16).
+
+%%%%%%%%%%%  PICKING STATIONS  %%%%%%%%%%%
+pickingStationAt(1,9).      % Single picking-station at spot 9 (row 1,col 3)
+
+%%%%%%%%%%%  INITIAL ROBOT LOCATIONS (t = 0)  %%%%%%%%%%%
+robotAt(1,object(spot,12),0).   % Robot-1 at spot 12 (4,3)
+robotAt(2,object(spot,6 ),0).   % Robot-2 at spot 6  (2,2)
+
+%%%%%%%%%%%  RACK LOCATIONS (t = 0)  %%%%%%%%%%%
+rackOn(1,object(spot,11),0).    % rack 1  → spot 11
+rackOn(2,object(spot,2 ),0).    % rack 2  → spot 2
+rackOn(3,object(spot,10),0).    % rack 3  → spot 10
+rackOn(4,object(spot,6 ),0).    % rack 4  → spot 6   (shares node with Robot-2)
+rackOn(5,object(spot,7 ),0).    % rack 5  → spot 7
+rackOn(6,object(spot,5 ),0).    % rack 6  → spot 5
+
+%%%%%%%%%%%  PRODUCT ALLOCATIONS (t = 0)  %%%%%%%%%%%
+productOn(1,object(rack,3),with(quant,1),0).   % Product 1  (qty 1) on rack 3
+productOn(2,object(rack,4),with(quant,1),0).   % Product 2  (qty 1) on rack 4
+productOn(3,object(rack,6),with(quant,4),0).   % Product 3  (qty 4) on rack 6
+productOn(4,object(rack,5),with(quant,1),0).   % Product 4  (qty 1) on rack 5
+productOn(4,object(rack,6),with(quant,1),0).   % Product 4  (qty 1) also on rack 6
+
+%%%%%%%%%%%  ORDERS  %%%%%%%%%%%
+% Order 1, Picking-Station 1 (spot 9):
+%   · Product 1 ×1
+%   · Product 3 ×4
+orderAt(1,object(spot,9),contains(1,1),0).
+orderAt(1,object(spot,9),contains(3,4),0).
